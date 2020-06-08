@@ -122,8 +122,6 @@ abstract class BaseRepository implements RepositoryInterface
      */
     public function store(array $data)
     {
-        $this->unsetClauses();
-
         return $this->model->create($data);
     }
 
@@ -155,8 +153,6 @@ abstract class BaseRepository implements RepositoryInterface
      */
     public function deleteById($id): bool
     {
-        $this->unsetClauses();
-
         return $this->getById($id)->delete();
     }
 
@@ -304,6 +300,24 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
+     * Set clauses scopes on the query builder.
+     *
+     * @param string|array $scopes
+     *
+     * @return $this
+     */
+    protected function scopes($scopes)
+    {
+        if (is_string($scopes)) {
+            $scopes = explode(',', $scopes);
+        }
+
+        $this->scopes = $scopes;
+
+        return $this;
+    }
+
+    /**
      * Set query scopes.
      *
      * @return $this
@@ -408,6 +422,7 @@ abstract class BaseRepository implements RepositoryInterface
         $this->whereIns = [];
         $this->scopes = [];
         $this->take = null;
+        $this->unsetOrderBy();
 
         return $this;
     }
@@ -421,6 +436,20 @@ abstract class BaseRepository implements RepositoryInterface
     {
         if (!empty($this->with)) {
             $this->with = [];
+        }
+
+        return $this;
+    }
+
+    /**
+     * Reset the query order by arrays.
+     *
+     * @return $this
+     */
+    protected function unsetOrderBy()
+    {
+        if (!empty($this->orderBys)) {
+            $this->orderBys = [];
         }
 
         return $this;
