@@ -1,0 +1,19 @@
+<?php
+
+namespace DummyNamespace;
+
+use Larasitory\Repository\BaseRepository;
+use App\Repositories\Contracts\DummyClassInterface;
+
+class DummyClass extends BaseRepository implements DummyClassInterface
+{
+     /**
+     * Set model database
+     *
+     * @return mixed|string
+     */
+    public function model()
+    {
+        //
+    }
+}
