@@ -136,8 +136,8 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $models = new Collection();
 
-        foreach ($data as $d) {
-            $models->push($this->store($d));
+        foreach ($data as $item) {
+            $models->push($this->store($item));
         }
 
         return $models;
@@ -302,17 +302,14 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Set clauses scopes on the query builder.
      *
-     * @param string|array $scopes
+     * @param string $method
+     * @param mixed $args
      *
      * @return $this
      */
-    protected function scopes($scopes)
+    protected function scopes($method, ...$args)
     {
-        if (is_string($scopes)) {
-            $scopes = explode(',', $scopes);
-        }
-
-        $this->scopes = $scopes;
+        $this->scopes[] = compact('method', 'args');
 
         return $this;
     }
@@ -324,8 +321,20 @@ abstract class BaseRepository implements RepositoryInterface
      */
     protected function setScopes()
     {
-        foreach ($this->scopes as $method => $args) {
-            $this->query->$method(implode(', ', $args));
+        foreach ($this->scopes as $scope) {
+            if ($scope['args'] === []) {
+                $this->query->{$scope['method']}();
+                continue;
+            }
+            $args = "";
+            foreach ($scope['args'] as $arg) {
+                if (is_array($arg)) {
+                    $args .= "[" . implode(", ", $arg) . "] ";
+                    continue;
+                }
+                $args .= $arg . " ";
+            }
+            $this->query->{$scope['method']}(trim($args));
         }
 
         return $this;
