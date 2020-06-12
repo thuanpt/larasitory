@@ -198,6 +198,7 @@ abstract class BaseRepository implements RepositoryInterface
         $model = $this->query->firstOrFail($columns);
 
         $this->unsetClauses();
+        $this->unsetWith();
 
         return $model;
     }
@@ -478,17 +479,17 @@ abstract class BaseRepository implements RepositoryInterface
      * Get instance
      *
      * @param integer|array $id ID
-     * @param bool          $withTrashed  with Trash ? (true/false)
+     * @param array|mixed $columns columns
      *
      * @return mixed
      */
-    public function find($id, $withTrashed = false)
+    public function find($id, $columns = ['*'])
     {
-        return $this->model
-            ->when($withTrashed, function ($query) {
-                $query->withTrashed();
-            })
-            ->find($id);
+        $this->newQuery()->eagerLoad();
+        $model = $this->query->find($id, $columns);
+        $this->unsetWith();
+
+        return $model;
     }
 
     /**
@@ -531,7 +532,11 @@ abstract class BaseRepository implements RepositoryInterface
      */
     public function findOrFail($id, $columns = ['*'])
     {
-        return $this->model->findOrFail($id, $columns);
+        $this->newQuery()->eagerLoad();
+        $model = $this->query->findOrFail($id, $columns);
+        $this->unsetWith();
+
+        return $model;
     }
 
     /**
